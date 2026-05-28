@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hangul Buddy - Dual Track Learning</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+    <style>
+        body { background-color: #f8fafc; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        .premium-shadow { box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.01); }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState } = React;
+
+        // Vocabulary Databases
+        const trackA_Kindergarten = [
+            { korean: "안녕", pronunciation: "An-nyeong", english: "Hello (Informal)", type: "Word" },
+            { korean: "네", pronunciation: "Ne", english: "Yes", type: "Word" },
+            { korean: "아니요", pronunciation: "A-ni-yo", english: "No", type: "Word" },
+            { korean: "물", pronunciation: "Mul", english: "Water", type: "Word" },
+            { korean: "고마워요", pronunciation: "Go-ma-wo-yo", english: "Thank you", type: "Word" }
+        ];
+
+        const trackB_Aquaculture = [
+            { korean: "전복", pronunciation: "Jeon-bok", english: "Abalone", type: "Word" },
+            { korean: "양식장", pronunciation: "Yang-sik-jang", english: "Farm / Hatchery", type: "Word" },
+            { korean: "수온", pronunciation: "Su-on", english: "Water Temperature", type: "Word" },
+            { korean: "다시마", pronunciation: "Da-si-ma", english: "Kelp (Feed)", type: "Word" },
+            { korean: "선별", pronunciation: "Seon-byeol", english: "Sorting / Size grading", type: "Word" }
+        ];
+
+        function App() {
+            const [activeTrack, setActiveTrack] = useState('A');
+            const [activeTab, setActiveTab] = useState('daily');
+
+            const currentVocab = activeTrack === 'A' ? trackA_Kindergarten : trackB_Aquaculture;
+
+            // Simple Text-to-Speech function
+            const playAudio = (text) => {
+                const utterance = new SpeechSynthesisUtterance(text);
+                utterance.lang = 'ko-KR';
+                window.speechSynthesis.speak(utterance);
+            };
+
+            return (
+                <div className="max-w-md mx-auto min-h-screen bg-slate-50 text-slate-800 pb-20">
+                    
+                    {/* Header */}
+                    <div className="bg-indigo-900 text-white p-6 rounded-b-3xl shadow-lg">
+                        <h1 className="text-2xl font-bold mb-2">Hangul Buddy</h1>
+                        <p className="text-indigo-200 text-sm">Your daily language workspace</p>
+                    </div>
+
+                    {/* Track Selector */}
+                    <div className="px-6 mt-6">
+                        <div className="flex bg-slate-200 p-1 rounded-xl">
+                            <button 
+                                onClick={() => setActiveTrack('A')}
+                                className={`flex-1 py-2 rounded-lg text-sm font-semibold transition-all ${activeTrack === 'A' ? 'bg-white text-indigo-900 shadow-sm' : 'text-slate-500'}`}
+                            >
+                                👶 Kindergarten
+                            </button>
+                            <button 
+                                onClick={() => setActiveTrack('B')}
+                                className={`flex-1 py-2 rounded-lg text-sm font-semibold transition-all ${activeTrack === 'B' ? 'bg-white text-emerald-700 shadow-sm' : 'text-slate-500'}`}
+                            >
+                                🌊 Aquaculture
+                            </button>
+                        </div>
+                    </div>
+
+                    {/* Main Content Area */}
+                    <div className="px-6 mt-6">
+                        {activeTab === 'daily' && (
+                            <div>
+                                <h2 className="text-lg font-bold text-slate-700 mb-4">Today's Words</h2>
+                                <div className="space-y-3">
+                                    {currentVocab.map((item, index) => (
+                                        <div key={index} className="bg-white p-4 rounded-xl premium-shadow flex justify-between items-center border border-slate-100">
+                                            <div>
+                                                <h3 className="text-xl font-bold text-slate-800">{item.korean}</h3>
+                                                <p className="text-xs text-slate-400 mb-1">{item.pronunciation}</p>
+                                                <p className="text-sm text-slate-600">{item.english}</p>
+                                            </div>
+                                            <button 
+                                                onClick={() => playAudio(item.korean)}
+                                                className="h-10 w-10 bg-indigo-50 text-indigo-600 rounded-full flex items-center justify-center hover:bg-indigo-100"
+                                            >
+                                                🔊
+                                            </button>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
+
+                        {activeTab === 'practice' && (
+                            <div className="bg-white p-6 rounded-xl premium-shadow border border-slate-100 text-center mt-10">
+                                <h2 className="text-lg font-bold text-slate-700 mb-2">Sandbox Practice</h2>
+                                <p className="text-sm text-slate-500 mb-6">Tap the mic to practice speaking your daily words!</p>
+                                <button className="h-16 w-16 bg-emerald-600 text-white rounded-full text-2xl flex items-center justify-center mx-auto shadow-lg hover:bg-emerald-700 transition">
+                                    🎤
+                                </button>
+                                <p className="text-xs text-emerald-600 mt-4 font-semibold">Ready to listen...</p>
+                            </div>
+                        )}
+                    </div>
+
+                    {/* Bottom Navigation */}
+                    <div className="fixed bottom-0 left-0 right-0 max-w-md mx-auto bg-white border-t border-slate-200 flex justify-around p-4 pb-6">
+                        <button 
+                            onClick={() => setActiveTab('daily')}
+                            className={`flex flex-col items-center ${activeTab === 'daily' ? 'text-indigo-600' : 'text-slate-400'}`}
+                        >
+                            <span className="text-xl mb-1">📚</span>
+                            <span className="text-xs font-semibold">Learn</span>
+                        </button>
+                        <button 
+                            onClick={() => setActiveTab('practice')}
+                            className={`flex flex-col items-center ${activeTab === 'practice' ? 'text-indigo-600' : 'text-slate-400'}`}
+                        >
+                            <span className="text-xl mb-1">💬</span>
+                            <span className="text-xs font-semibold">Practice</span>
+                        </button>
+                    </div>
+
+                </div>
+            );
+        }
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+</body>
+</html>
