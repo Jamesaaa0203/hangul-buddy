@@ -3,101 +3,325 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Hangul Buddy - Dual Track Learning</title>
+    <title>Hangul Buddy - Premium Workspace Edition</title>
     
+    <!-- Tailwind CSS for modern premium styling -->
     <script src="https://cdn.tailwindcss.com"></script>
     
+    <!-- React, ReactDOM, and Babel CDNs -->
     <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
     <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
-    
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
 
     <style>
-        body { background-color: #f8fafc; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
-        .premium-shadow { box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.01); }
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap');
+        body { 
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: #fcfbf9; /* Warm luxury cream linen background */
+        }
+        .premium-card {
+            background: #ffffff;
+            border: 1px solid #f1ece4;
+            box-shadow: 0 4px 20px -2px rgba(28, 25, 23, 0.03);
+            border-radius: 1.25rem;
+        }
+        .premium-glow {
+            box-shadow: 0 0 25px 0 rgba(79, 70, 229, 0.08);
+        }
     </style>
 </head>
-<body>
+<body class="text-stone-800 antialiased">
     <div id="root"></div>
 
     <script type="text/babel">
-        const { useState } = React;
+        const { useState, useEffect } = React;
 
-        // Vocabulary Databases
-        const trackA_Kindergarten = [
-            { korean: "안녕", pronunciation: "An-nyeong", english: "Hello (Informal)", type: "Word" },
-            { korean: "네", pronunciation: "Ne", english: "Yes", type: "Word" },
-            { korean: "아니요", pronunciation: "A-ni-yo", english: "No", type: "Word" },
-            { korean: "물", pronunciation: "Mul", english: "Water", type: "Word" },
-            { korean: "고마워요", pronunciation: "Go-ma-wo-yo", english: "Thank you", type: "Word" }
-        ];
-
-        const trackB_Aquaculture = [
-            { korean: "전복", pronunciation: "Jeon-bok", english: "Abalone", type: "Word" },
-            { korean: "양식장", pronunciation: "Yang-sik-jang", english: "Farm / Hatchery", type: "Word" },
-            { korean: "수온", pronunciation: "Su-on", english: "Water Temperature", type: "Word" },
-            { korean: "다시마", pronunciation: "Da-si-ma", english: "Kelp (Feed)", type: "Word" },
-            { korean: "선별", pronunciation: "Seon-byeol", english: "Sorting / Size grading", type: "Word" }
-        ];
+        // EXPANDED SYLLABUS DATABASE
+        const BACKEND_DATABASE = {
+            A: [ // Track A: Kindergarten to Practical Social Phrases
+                { id: "a1", level: "Kindergarten (Level 1)", korean: "안녕", pronunciation: "An-nyeong", english: "Hello / Goodbye (Casual)", phrase: "안녕, 친구야! (Hello, my friend!)" },
+                { id: "a2", level: "Kindergarten (Level 1)", korean: "네", pronunciation: "Ne", english: "Yes (Polite)", phrase: "네, 맞아요. (Yes, that is correct.)" },
+                { id: "a3", level: "Kindergarten (Level 1)", korean: "아니요", pronunciation: "A-ni-yo", english: "No (Polite)", phrase: "아니요, 아닙니다. (No, it is not.)" },
+                { id: "a4", level: "Kindergarten (Level 1)", korean: "물", pronunciation: "Mul", english: "Water", phrase: "물 주세요. (Water, please.)" },
+                { id: "a5", level: "Kindergarten (Level 1)", korean: "감사합니다", pronunciation: "Gam-sa-ham-ni-da", english: "Thank you (Formal)", phrase: "도와주셔서 감사합니다. (Thank you for helping me.)" },
+                { id: "a6", level: "Primary (Level 2)", korean: "안녕하세요", pronunciation: "An-nyeong-ha-se-yo", english: "Hello (Standard Polite)", phrase: "안녕하세요, 매니저님. (Hello, manager.)" },
+                { id: "a7", level: "Primary (Level 2)", korean: "죄송합니다", pronunciation: "Joe-song-ham-ni-da", english: "I am sorry (Formal)", phrase: "늦어서 죄송합니다. (I am sorry for being late.)" },
+                { id: "a8", level: "Primary (Level 2)", korean: "이거", pronunciation: "I-geo", english: "This one", phrase: "이거 얼마예요? (How much is this one?)" },
+                { id: "a9", level: "Daily Living (Level 3)", korean: "어디예요?", pronunciation: "Eo-di-ye-yo?", english: "Where is it?", phrase: "화장실이 어디예요? (Where is the restroom?)" },
+                { id: "a10", level: "Workplace Social (Level 4)", korean: "수고하셨습니다", pronunciation: "Su-go-ha-syeot-seum-ni-da", english: "Thank you for your hard work", phrase: "오늘 모두 수고하셨습니다. (Great work everyone today.)" },
+                { id: "a11", level: "Workplace Social (Level 4)", korean: "잘 부탁드립니다", pronunciation: "Jal bu-tak-deu-rim-ni-da", english: "I look forward to working with you", phrase: "앞으로 잘 부탁드립니다. (I look forward to your support here.)" },
+                { id: "a12", level: "Daily Living (Level 3)", korean: "내일 봐요", pronunciation: "Nae-il bwa-yo", english: "See you tomorrow", phrase: "정말 즐거웠어요, 내일 봐요. (It was really fun, see you tomorrow.)" }
+            ],
+            B: [ // Track B: Technical Aquaculture & Abalone Farm Operations
+                { id: "b1", level: "Farm Basics", korean: "전복", pronunciation: "Jeon-bok", english: "Abalone", phrase: "전복 상태가 좋습니다. (The abalone condition is good.)" },
+                { id: "b2", level: "Farm Basics", korean: "양식장", pronunciation: "Yang-sik-jang", english: "Aquaculture Farm / Hatchery", phrase: "양식장을 청소합시다. (Let's clean the aquaculture facility.)" },
+                { id: "b3", level: "Operations", korean: "수온", pronunciation: "Su-on", english: "Water Temperature", phrase: "매일 수온을 확인해야 합니다. (We must check the water temperature daily.)" },
+                { id: "b4", level: "Operations", korean: "다시마", pronunciation: "Da-si-ma", english: "Kelp (Abalone Feed)", phrase: "전복에게 다시마를 줍니다. (Feeding kelp to the abalones.)" },
+                { id: "b5", level: "Processing", korean: "선별", pronunciation: "Seon-byeol", english: "Sorting / Size Grading", phrase: "오늘 오후에 전복 선별 작업을 합니다. (We are grading abalone sizes this afternoon.)" },
+                { id: "b6", level: "Hatchery", korean: "치패", pronunciation: "Chi-pae", english: "Spat / Juvenile Abalone", phrase: "치패가 건강하게 자라고 있어요. (The spats are growing healthily.)" },
+                { id: "b7", level: "Hatchery", korean: "모패", pronunciation: "Mo-pae", english: "Broodstock / Parent Abalone", phrase: "모패 관리가 중요합니다. (Broodstock management is highly critical.)" },
+                { id: "b8", level: "Operations", korean: "용존산소", pronunciation: "Yong-jon-san-so", english: "Dissolved Oxygen (DO)", phrase: "용존산소 수치를 점검하세요. (Please inspect the dissolved oxygen parameters.)" },
+                { id: "b9", level: "Infrastructure", korean: "순환 펌프", pronunciation: "Sun-hwan peom-peu", english: "Circulation Pump", phrase: "순환 펌프가 정상 작동 중입니다. (The circulation pump is operating normally.)" },
+                { id: "b10", level: "Maintenance", korean: "세척", pronunciation: "Se-cheok", english: "Washing / Tank Flushes", phrase: "수조 세척 주기가 되었습니다. (It is time for the tank washing cycle.)" },
+                { id: "b11", level: "Logistics", korean: "출하", pronunciation: "Chul-ha", english: "Shipment / Market Export", phrase: "이번 주에 전복 출하가 진행됩니다. (Abalone exports will proceed this week.)" },
+                { id: "b12", level: "Operations", korean: "폐사", pronunciation: "Pye-sa", english: "Mortality / Die-off", phrase: "폐사율을 최대한 낮춰야 합니다. (We must minimize the mortality rate at all costs.)" }
+            ]
+        };
 
         function App() {
             const [activeTrack, setActiveTrack] = useState('A');
-            const [activeTab, setActiveTab] = useState('daily');
+            const [activeTab, setActiveTab] = useState('learn');
+            
+            // Core States stored safely inside browser LocalStorage
+            const [learnedList, setLearnedList] = useState(() => {
+                const saved = localStorage.getItem('hb_learned_list');
+                return saved ? JSON.parse(saved) : {};
+            });
+            const [dailyBatchIndex, setDailyBatchIndex] = useState(() => {
+                const saved = localStorage.getItem('hb_batch_index');
+                return saved ? parseInt(saved, 10) : 0;
+            });
 
-            const currentVocab = activeTrack === 'A' ? trackA_Kindergarten : trackB_Aquaculture;
+            // Quiz Specific Engine State
+            const [quizActive, setQuizActive] = useState(false);
+            const [quizQuestions, setQuizQuestions] = useState([]);
+            const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
+            const [selectedAnswer, setSelectedAnswer] = useState(null);
+            const [score, setScore] = useState(0);
+            const [quizCompleted, setQuizCompleted] = useState(false);
 
-            // Simple Text-to-Speech function
-            const playAudio = (text) => {
-                const utterance = new SpeechSynthesisUtterance(text);
-                utterance.lang = 'ko-KR';
-                window.speechSynthesis.speak(utterance);
+            // Sandbox Voice Tracking State
+            const [isListening, setIsListening] = useState(false);
+            const [transcript, setTranscript] = useState("");
+            const [sandboxFeedback, setSandboxFeedback] = useState("");
+
+            useEffect(() => {
+                localStorage.setItem('hb_learned_list', JSON.stringify(learnedList));
+            }, [learnedList]);
+
+            useEffect(() => {
+                localStorage.setItem('hb_batch_index', premiums_index => dailyBatchIndex);
+            }, [dailyBatchIndex]);
+
+            // Native Web Speech Output Synthesis
+            const handleSpeak = (text) => {
+                if ('speechSynthesis' in window) {
+                    window.speechSynthesis.cancel();
+                    const sound = new SpeechSynthesisUtterance(text);
+                    sound.lang = 'ko-KR';
+                    sound.rate = 0.85; // Slightly slower, clean speed for precise parsing
+                    window.speechSynthesis.speak(sound);
+                } else {
+                    alert("Your browser does not support Audio Output. Try using Chrome or Safari.");
+                }
+            };
+
+            // Dynamic Lesson Loader (Pulls items dynamically)
+            const fullTrackData = BACKEND_DATABASE[activeTrack];
+            const wordsPerBatch = 4;
+            const totalBatches = Math.ceil(fullTrackData.length / wordsPerBatch);
+            const startIndex = (dailyBatchIndex % totalBatches) * wordsPerBatch;
+            const currentDailyWords = fullTrackData.slice(startIndex, startIndex + wordsPerBatch);
+
+            const toggleMarkAsLearned = (id) => {
+                setLearnedList(prev => ({
+                    ...prev,
+                    [id]: !prev[id]
+                }));
+            };
+
+            const advanceDailyBatch = () => {
+                setDailyBatchIndex(prev => (prev + 1) % totalBatches);
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            };
+
+            // Dynamic Quiz Generator Engine
+            const initQuiz = () => {
+                // Compile pool: favor marked words, fall back to full track if deck is small
+                let pool = fullTrackData.filter(item => learnedList[item.id]);
+                if (pool.length < 4) {
+                    pool = fullTrackData; 
+                }
+
+                // Pick randomized subset questions
+                const shuffledPool = [...pool].sort(() => 0.5 - Math.random()).slice(0, 5);
+                
+                const generatedQuestions = shuffledPool.map(target => {
+                    const incorrectOptions = fullTrackData
+                        .filter(item => item.id !== target.id)
+                        .sort(() => 0.5 - Math.random())
+                        .slice(0, 3)
+                        .map(item => item.english);
+                    
+                    const answers = [...incorrectOptions, target.english].sort(() => 0.5 - Math.random());
+                    return {
+                        korean: target.korean,
+                        correctAnswer: target.english,
+                        options: answers
+                    };
+                });
+
+                setQuizQuestions(generatedQuestions);
+                setCurrentQuestionIndex(0);
+                setSelectedAnswer(null);
+                setScore(0);
+                setQuizCompleted(false);
+                setQuizActive(true);
+            };
+
+            const handleAnswerSubmit = (option) => {
+                setSelectedAnswer(option);
+                if (option === quizQuestions[currentQuestionIndex].correctAnswer) {
+                    setScore(prev => prev + 1);
+                }
+            };
+
+            const advanceQuiz = () => {
+                setSelectedAnswer(null);
+                if (currentQuestionIndex + 1 < quizQuestions.length) {
+                    setCurrentQuestionIndex(prev => prev + 1);
+                } else {
+                    setQuizCompleted(true);
+                }
+            };
+
+            // Native Web Voice Speech Recognition API Hook
+            const startVoiceCapture = () => {
+                const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+                if (!SpeechRecognition) {
+                    alert("Speech recognition isn't supported in this browser layout. Please use Google Chrome.");
+                    return;
+                }
+                const recognition = new SpeechRecognition();
+                recognition.lang = 'ko-KR';
+                recognition.interimResults = false;
+                recognition.maxAlternatives = 1;
+
+                setIsListening(true);
+                setTranscript("");
+                setSandboxFeedback("");
+
+                recognition.start();
+
+                recognition.onresult = (event) => {
+                    const speechToText = event.results[0][0].transcript;
+                    setTranscript(speechToText);
+                    
+                    // Simple programmatic phrase assessment matrix
+                    const matchedWord = fullTrackData.find(item => speechToText.includes(item.korean));
+                    if (matchedWord) {
+                        setSandboxFeedback(`✨ Excellent! Detected keyword: "${matchedWord.korean}" (${matchedWord.english}). Perfect pronunciation!`);
+                    } else {
+                        setSandboxFeedback(`👍 Heard: "${speechToText}". Great effort! Try speaking closer to the microphone or enunciate clearly.`);
+                    }
+                };
+
+                recognition.onerror = () => {
+                    setSandboxFeedback("⚠️ Could not capture audio. Check your browser microphone access privacy headers.");
+                    setIsListening(false);
+                };
+
+                recognition.onend = () => {
+                    setIsListening(false);
+                };
+            };
+
+            const injectQuickTapPhrase = (koreanText) => {
+                setTranscript(koreanText);
+                setSandboxFeedback(`📱 Quick-Tap Input Saved: "${koreanText}". Hit the Speaker node to audit pronunciation.`);
+                handleSpeak(koreanText);
             };
 
             return (
-                <div className="max-w-md mx-auto min-h-screen bg-slate-50 text-slate-800 pb-20">
+                <div className="max-w-md mx-auto min-h-screen pb-24 shadow-xl border-x border-stone-100 bg-[#fbfaf7]">
                     
-                    {/* Header */}
-                    <div className="bg-indigo-900 text-white p-6 rounded-b-3xl shadow-lg">
-                        <h1 className="text-2xl font-bold mb-2">Hangul Buddy</h1>
-                        <p className="text-indigo-200 text-sm">Your daily language workspace</p>
-                    </div>
+                    {/* Upper App Identity */}
+                    <div className="bg-indigo-950 text-stone-100 p-6 rounded-b-[2rem] shadow-md border-b-4 border-amber-500/20">
+                        <div className="flex justify-between items-center">
+                            <div>
+                                <h1 className="text-2xl font-bold tracking-tight text-white flex items-center gap-2">
+                                    한글 Buddy <span className="text-xs font-normal bg-indigo-800 text-amber-400 px-2.5 py-0.5 rounded-full">Workspace v1.2</span>
+                                </h1>
+                                <p className="text-stone-300 text-xs mt-1">Dual-Track Korean Learning System</p>
+                            </div>
+                            <div className="h-10 w-10 bg-amber-500/10 border border-amber-500/30 rounded-xl flex items-center justify-center text-lg shadow-inner">
+                                🌊
+                            </div>
+                        </div>
 
-                    {/* Track Selector */}
-                    <div className="px-6 mt-6">
-                        <div className="flex bg-slate-200 p-1 rounded-xl">
+                        {/* Track Control Switcher */}
+                        <div className="flex mt-6 bg-indigo-900/60 p-1 rounded-xl border border-indigo-800">
                             <button 
-                                onClick={() => setActiveTrack('A')}
-                                className={`flex-1 py-2 rounded-lg text-sm font-semibold transition-all ${activeTrack === 'A' ? 'bg-white text-indigo-900 shadow-sm' : 'text-slate-500'}`}
+                                onClick={() => { setActiveTrack('A'); setQuizActive(false); }}
+                                className={`flex-1 py-2 rounded-lg text-xs font-bold tracking-wide uppercase transition-all duration-200 ${activeTrack === 'A' ? 'bg-amber-500 text-indigo-950 shadow-md' : 'text-stone-400 hover:text-stone-200'}`}
                             >
-                                👶 Kindergarten
+                                👶 General Basics
                             </button>
                             <button 
-                                onClick={() => setActiveTrack('B')}
-                                className={`flex-1 py-2 rounded-lg text-sm font-semibold transition-all ${activeTrack === 'B' ? 'bg-white text-emerald-700 shadow-sm' : 'text-slate-500'}`}
+                                onClick={() => { setActiveTrack('B'); setQuizActive(false); }}
+                                className={`flex-1 py-2 rounded-lg text-xs font-bold tracking-wide uppercase transition-all duration-200 ${activeTrack === 'B' ? 'bg-emerald-600 text-white shadow-md' : 'text-stone-400 hover:text-stone-200'}`}
                             >
-                                🌊 Aquaculture
+                                🌊 Abalone Farm Tech
                             </button>
                         </div>
                     </div>
 
-                    {/* Main Content Area */}
-                    <div className="px-6 mt-6">
-                        {activeTab === 'daily' && (
-                            <div>
-                                <h2 className="text-lg font-bold text-slate-700 mb-4">Today's Words</h2>
-                                <div className="space-y-3">
-                                    {currentVocab.map((item, index) => (
-                                        <div key={index} className="bg-white p-4 rounded-xl premium-shadow flex justify-between items-center border border-slate-100">
-                                            <div>
-                                                <h3 className="text-xl font-bold text-slate-800">{item.korean}</h3>
-                                                <p className="text-xs text-slate-400 mb-1">{item.pronunciation}</p>
-                                                <p className="text-sm text-slate-600">{item.english}</p>
+                    {/* Primary Tab View Area */}
+                    <div className="px-5 mt-6">
+                        
+                        {/* TAB 1: DAILY CORE CURRICULUM */}
+                        {activeTab === 'learn' && !quizActive && (
+                            <div className="space-y-4">
+                                <div className="flex justify-between items-center">
+                                    <div>
+                                        <h2 className="text-sm font-bold uppercase tracking-wider text-stone-400">Today's Study Deck</h2>
+                                        <p className="text-xs text-stone-500">Batch {dailyBatchIndex + 1} of {totalBatches}</p>
+                                    </div>
+                                    <button 
+                                        onClick={advanceDailyBatch}
+                                        className="text-xs font-semibold bg-indigo-50 text-indigo-700 px-3 py-1.5 rounded-lg border border-indigo-100 hover:bg-indigo-100 transition"
+                                    >
+                                        Next Batch 🔄
+                                    </button>
+                                </div>
+
+                                <div className="space-y-3.5">
+                                    {currentDailyWords.map((word) => (
+                                        <div key={word.id} className="premium-card p-4 flex flex-col justify-between transition-all hover:border-indigo-200">
+                                            <div className="flex justify-between items-start">
+                                                <div>
+                                                    <span className="text-[10px] uppercase font-bold tracking-widest text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded">
+                                                        {word.level}
+                                                    </span>
+                                                    <h3 className="text-2xl font-bold text-indigo-950 mt-1.5 tracking-tight">{word.korean}</h3>
+                                                    <p className="text-xs text-amber-700 font-medium tracking-wide">Pronunciation: {word.pronunciation}</p>
+                                                    <p className="text-base font-semibold text-stone-700 mt-1">{word.english}</p>
+                                                </div>
+                                                <button 
+                                                    onClick={() => handleSpeak(word.korean)}
+                                                    className="h-10 w-10 bg-stone-100 text-stone-600 rounded-full flex items-center justify-center hover:bg-indigo-900 hover:text-white transition shadow-sm text-base"
+                                                    title="Listen to Sound"
+                                                >
+                                                    🔊
+                                                </button>
                                             </div>
+                                            
+                                            {/* Context Practice Sentence Strip */}
+                                            <div className="mt-3 pt-3 border-t border-stone-100 bg-stone-50/70 p-2.5 rounded-lg">
+                                                <div className="flex justify-between items-center">
+                                                    <p className="text-xs font-bold text-stone-400 uppercase tracking-widest">Example Application</p>
+                                                    <button onClick={() => handleSpeak(word.phrase)} className="text-xs text-indigo-600 hover:underline">Speak Context</button>
+                                                </div>
+                                                <p className="text-sm font-semibold text-indigo-950 mt-0.5">{word.phrase.split('(')[0]}</p>
+                                                <p className="text-xs text-stone-500">({word.phrase.split('(')[1] || ""}</p>
+                                            </div>
+
+                                            {/* Checkbox Save Matrix Button */}
                                             <button 
-                                                onClick={() => playAudio(item.korean)}
-                                                className="h-10 w-10 bg-indigo-50 text-indigo-600 rounded-full flex items-center justify-center hover:bg-indigo-100"
+                                                onClick={() => toggleMarkAsLearned(word.id)}
+                                                className={`mt-3 w-full py-2 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5 ${learnedList[word.id] ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : 'bg-stone-100 text-stone-600 border border-transparent hover:bg-stone-200'}`}
                                             >
-                                                🔊
+                                                {learnedList[word.id] ? "✅ Saved to Notebook Bank" : "📥 Save to Weekly Quiz Deck"}
                                             </button>
                                         </div>
                                     ))}
@@ -105,33 +329,228 @@
                             </div>
                         )}
 
-                        {activeTab === 'practice' && (
-                            <div className="bg-white p-6 rounded-xl premium-shadow border border-slate-100 text-center mt-10">
-                                <h2 className="text-lg font-bold text-slate-700 mb-2">Sandbox Practice</h2>
-                                <p className="text-sm text-slate-500 mb-6">Tap the mic to practice speaking your daily words!</p>
-                                <button className="h-16 w-16 bg-emerald-600 text-white rounded-full text-2xl flex items-center justify-center mx-auto shadow-lg hover:bg-emerald-700 transition">
-                                    🎤
-                                </button>
-                                <p className="text-xs text-emerald-600 mt-4 font-semibold">Ready to listen...</p>
+                        {/* TAB 2: PERSONAL NOTEBOOK INDEX */}
+                        {activeTab === 'notebook' && !quizActive && (
+                            <div className="space-y-4">
+                                <div>
+                                    <h2 className="text-sm font-bold uppercase tracking-wider text-stone-400">Saved Master Dictionary</h2>
+                                    <p className="text-xs text-stone-500">These keywords will be featured inside your Weekly Examinations.</p>
+                                </div>
+
+                                {fullTrackData.filter(i => learnedList[i.id]).length === 0 ? (
+                                    <div className="premium-card p-8 text-center text-stone-400 text-sm">
+                                        Your notebook is currently empty.<br/>Go save some daily terms to activate!
+                                    </div>
+                                ) : (
+                                    <div className="space-y-2.5">
+                                        {fullTrackData.filter(i => learnedList[i.id]).map(word => (
+                                            <div key={word.id} className="bg-white p-3.5 rounded-xl border border-stone-200/80 flex justify-between items-center">
+                                                <div>
+                                                    <div className="flex items-center gap-2">
+                                                        <h4 className="text-lg font-bold text-indigo-950">{word.korean}</h4>
+                                                        <span className="text-[10px] bg-stone-100 text-stone-500 px-1.5 py-0.2 rounded font-medium">{word.pronunciation}</span>
+                                                    </div>
+                                                    <p className="text-xs text-stone-600 font-medium">{word.english}</p>
+                                                </div>
+                                                <div className="flex gap-1">
+                                                    <button onClick={() => handleSpeak(word.korean)} className="h-8 w-8 bg-stone-50 rounded-full flex items-center justify-center border border-stone-100 text-sm">🔊</button>
+                                                    <button onClick={() => toggleMarkAsLearned(word.id)} className="h-8 w-8 text-rose-500 bg-rose-50 rounded-full flex items-center justify-center border border-rose-100 text-xs">🗑️</button>
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                )}
                             </div>
                         )}
+
+                        {/* TAB 3: WEEKLY INTEGRATED QUIZ DESK */}
+                        {(activeTab === 'quiz' || quizActive) && (
+                            <div className="space-y-4">
+                                {!quizActive ? (
+                                    <div className="premium-card p-6 text-center border-t-4 border-amber-500 premium-glow">
+                                        <div className="text-4xl mb-3">📝</div>
+                                        <h3 className="text-xl font-bold text-indigo-950">Weekly Competency Exam</h3>
+                                        <p className="text-xs text-stone-500 mt-1 max-w-xs mx-auto">
+                                            Evaluates your retention using randomized multi-choice vectors compiled directly from your saved database deck.
+                                        </p>
+                                        
+                                        <div className="bg-stone-50 p-3 rounded-xl my-4 text-xs text-stone-600 border border-stone-100">
+                                            📊 Active Vocabulary Pool Capacity: <span className="font-bold text-indigo-900">{fullTrackData.filter(i => learnedList[i.id]).length} words saved</span>
+                                        </div>
+
+                                        <button 
+                                            onClick={initQuiz}
+                                            className="w-full bg-indigo-950 hover:bg-indigo-900 text-white font-bold py-3 px-4 rounded-xl text-sm tracking-wide shadow-md transition"
+                                        >
+                                            🚀 Generate Competency Exam
+                                        </button>
+                                    </div>
+                                ) : (
+                                    /* ACTIVE QUIZ ENGINE CONTAINER INTERFACE */
+                                    <div className="premium-card p-6 border-t-4 border-indigo-600">
+                                        {!quizCompleted ? (
+                                            <div>
+                                                <div className="flex justify-between items-center text-xs text-stone-400 font-bold uppercase tracking-wider mb-4">
+                                                    <span>Question {currentQuestionIndex + 1} of {quizQuestions.length}</span>
+                                                    <span className="text-indigo-600">Score: {score}</span>
+                                                </div>
+                                                
+                                                <div className="bg-indigo-50 rounded-2xl p-6 text-center my-4 border border-indigo-100">
+                                                    <span className="text-xs font-bold uppercase tracking-widest text-indigo-500">Translate this text</span>
+                                                    <h3 className="text-3xl font-black text-indigo-950 mt-1 tracking-wide">{quizQuestions[currentQuestionIndex].korean}</h3>
+                                                    <button 
+                                                        onClick={() => handleSpeak(quizQuestions[currentQuestionIndex].korean)}
+                                                        className="mt-2 text-xs font-bold bg-white text-indigo-600 px-3 py-1 rounded-full shadow-sm hover:bg-indigo-100 transition mx-auto flex items-center gap-1"
+                                                    >
+                                                        🔊 Listen Audio
+                                                    </button>
+                                                </div>
+
+                                                <div className="space-y-2 mt-6">
+                                                    {quizQuestions[currentQuestionIndex].options.map((option, idx) => {
+                                                        let btnStyle = "border-stone-200 hover:bg-stone-50 hover:border-stone-300 text-stone-700 bg-white";
+                                                        if (selectedAnswer !== null) {
+                                                            if (option === quizQuestions[currentQuestionIndex].correctAnswer) {
+                                                                btnStyle = "bg-emerald-500 border-emerald-600 text-white font-bold";
+                                                            } else if (selectedAnswer === option) {
+                                                                btnStyle = "bg-rose-500 border-rose-600 text-white font-bold";
+                                                            } else {
+                                                                btnStyle = "opacity-40 bg-stone-100 border-stone-200 text-stone-400";
+                                                            }
+                                                        }
+                                                        return (
+                                                            <button 
+                                                                key={idx}
+                                                                disabled={selectedAnswer !== null}
+                                                                onClick={() => handleAnswerSubmit(option)}
+                                                                className={`w-full text-left p-3.5 rounded-xl border text-sm font-medium transition duration-150 ${btnStyle}`}
+                                                            >
+                                                                {option}
+                                                            </button>
+                                                        );
+                                                    })}
+                                                </div>
+
+                                                {selectedAnswer && (
+                                                    <button 
+                                                        onClick={advanceQuiz}
+                                                        className="w-full mt-6 bg-stone-900 text-white text-sm font-bold py-3 rounded-xl hover:bg-stone-800 transition shadow"
+                                                    >
+                                                        {currentQuestionIndex + 1 === quizQuestions.length ? "Finish Exam 🏁" : "Next Question ➡️"}
+                                                    </button>
+                                                )}
+                                            </div>
+                                        ) : (
+                                            /* QUIZ COMPLETED GRADE OUTPUT DISPLAY CARD */
+                                            <div className="text-center py-4">
+                                                <div className="text-5xl mb-2">🎉</div>
+                                                <h3 className="text-2xl font-black text-indigo-950">Exam Complete!</h3>
+                                                <p className="text-sm text-stone-500 mt-1">Excellent professional tracking execution.</p>
+                                                
+                                                <div className="my-6 max-w-xs mx-auto bg-stone-50 p-4 rounded-2xl border border-stone-100">
+                                                    <p className="text-xs uppercase font-bold tracking-widest text-stone-400">Performance Grade</p>
+                                                    <p className="text-4xl font-black text-indigo-900 my-1">{Math.round((score / quizQuestions.length) * 100)}%</p>
+                                                    <p className="text-xs text-stone-600 font-semibold mt-1">Answered {score} out of {quizQuestions.length} correct</p>
+                                                </div>
+
+                                                <button 
+                                                    onClick={() => setQuizActive(false)}
+                                                    className="w-full bg-indigo-950 text-white font-bold py-3 rounded-xl text-sm tracking-wide shadow hover:bg-indigo-900 transition"
+                                                >
+                                                    Return to Workspace Dashboard
+                                                </button>
+                                            </div>
+                                        )}
+                                    </div>
+                                )}
+                            </div>
+                        )}
+
+                        {/* TAB 4: HANDS-FREE SPEAKING SANDBOX */}
+                        {activeTab === 'sandbox' && !quizActive && (
+                            <div className="space-y-4">
+                                <div>
+                                    <h2 className="text-sm font-bold uppercase tracking-wider text-stone-400">Pronunciation Sandbox</h2>
+                                    <p className="text-xs text-stone-500">Practice oral pronunciation hands-free using your browser microphone engine.</p>
+                                </div>
+
+                                <div className="premium-card p-6 text-center border border-indigo-100 bg-white premium-glow">
+                                    <button 
+                                        onClick={startVoiceCapture}
+                                        disabled={isListening}
+                                        className={`h-20 w-20 rounded-full flex items-center justify-center text-3xl shadow-lg border-4 transition-all duration-300 mx-auto ${isListening ? 'bg-rose-500 border-rose-200 animate-pulse text-white' : 'bg-indigo-950 border-indigo-900 text-white hover:scale-105'}`}
+                                    >
+                                        {isListening ? "🛑" : "🎤"}
+                                    </button>
+                                    <p className={`text-xs font-bold mt-3 uppercase tracking-widest ${isListening ? 'text-rose-500' : 'text-indigo-600'}`}>
+                                        {isListening ? "Listening... Speak Korean Now" : "Tap Microphone to Speak"}
+                                    </p>
+
+                                    {/* Real-time Display Console */}
+                                    <div className="mt-6 bg-stone-50 p-4 rounded-xl border border-stone-200/70 text-left min-h-[80px]">
+                                        <span className="text-[10px] uppercase font-bold tracking-widest text-stone-400 block mb-1">Captured Text Stream</span>
+                                        <p className="text-sm font-bold text-indigo-950">{transcript || "No spoken input detected yet..."}</p>
+                                    </div>
+
+                                    {sandboxFeedback && (
+                                        <div className="mt-3 p-3 text-xs bg-amber-50 text-amber-900 font-medium rounded-xl border border-amber-200/60 text-left">
+                                            {sandboxFeedback}
+                                        </div>
+                                    )}
+                                </div>
+
+                                {/* QUICK TAP CARDS (Noise/Busy Area Alternative) */}
+                                <div className="space-y-2">
+                                    <h3 className="text-xs font-bold uppercase tracking-wider text-stone-400">Quick-Tap Native Shortcuts</h3>
+                                    <p className="text-[11px] text-stone-500 leading-tight">Can't speak out loud on the dock? Tap shortcuts to test audio synthesis automatically.</p>
+                                    
+                                    <div className="grid grid-cols-2 gap-2 mt-2">
+                                        {fullTrackData.slice(0, 4).map(item => (
+                                            <button 
+                                                key={item.id}
+                                                onClick={() => injectQuickTapPhrase(item.korean)}
+                                                className="bg-white p-2.5 rounded-xl border border-stone-200 text-left hover:border-indigo-400 transition"
+                                            >
+                                                <p className="text-xs font-bold text-indigo-950 truncate">{item.korean}</p>
+                                                <p className="text-[10px] text-stone-500 truncate">{item.english}</p>
+                                            </button>
+                                        ))}
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+
                     </div>
 
-                    {/* Bottom Navigation */}
-                    <div className="fixed bottom-0 left-0 right-0 max-w-md mx-auto bg-white border-t border-slate-200 flex justify-around p-4 pb-6">
+                    {/* Bottom Floating Navigation Docket */}
+                    <div className="fixed bottom-0 left-0 right-0 max-w-md mx-auto bg-white/95 backdrop-blur-md border-t border-stone-200/80 grid grid-cols-4 p-3 shadow-2xl">
                         <button 
-                            onClick={() => setActiveTab('daily')}
-                            className={`flex flex-col items-center ${activeTab === 'daily' ? 'text-indigo-600' : 'text-slate-400'}`}
+                            onClick={() => { setActiveTab('learn'); setQuizActive(false); }}
+                            className={`flex flex-col items-center py-1 transition ${activeTab === 'learn' ? 'text-indigo-600 font-bold' : 'text-stone-400 hover:text-stone-600'}`}
                         >
-                            <span className="text-xl mb-1">📚</span>
-                            <span className="text-xs font-semibold">Learn</span>
+                            <span className="text-lg">📚</span>
+                            <span className="text-[10px] tracking-tight mt-0.5">Syllabus</span>
                         </button>
                         <button 
-                            onClick={() => setActiveTab('practice')}
-                            className={`flex flex-col items-center ${activeTab === 'practice' ? 'text-indigo-600' : 'text-slate-400'}`}
+                            onClick={() => { setActiveTab('notebook'); setQuizActive(false); }}
+                            className={`flex flex-col items-center py-1 transition ${activeTab === 'notebook' ? 'text-indigo-600 font-bold' : 'text-stone-400 hover:text-stone-600'}`}
                         >
-                            <span className="text-xl mb-1">💬</span>
-                            <span className="text-xs font-semibold">Practice</span>
+                            <span className="text-lg">📥</span>
+                            <span className="text-[10px] tracking-tight mt-0.5">Notebook</span>
+                        </button>
+                        <button 
+                            onClick={() => { setActiveTab('quiz'); initQuiz(); }}
+                            className={`flex flex-col items-center py-1 transition ${activeTab === 'quiz' || quizActive ? 'text-indigo-600 font-bold' : 'text-stone-400 hover:text-stone-600'}`}
+                        >
+                            <span className="text-lg">📝</span>
+                            <span className="text-[10px] tracking-tight mt-0.5">Exam</span>
+                        </button>
+                        <button 
+                            onClick={() => { setActiveTab('sandbox'); setQuizActive(false); }}
+                            className={`flex flex-col items-center py-1 transition ${activeTab === 'sandbox' ? 'text-indigo-600 font-bold' : 'text-stone-400 hover:text-stone-600'}`}
+                        >
+                            <span className="text-lg">💬</span>
+                            <span className="text-[10px] tracking-tight mt-0.5">Sandbox</span>
                         </button>
                     </div>
 
